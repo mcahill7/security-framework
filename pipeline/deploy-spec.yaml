@@ -1,0 +1,18 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      ruby: 2.6
+
+  build:
+    commands:
+      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file config_resources.yaml --stack-name "$REPO_NAME-resources" --capabilities CAPABILITY_NAMED_IAM
+
+  post_build:
+    commands:
+      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file config_rules.yaml --stack-name "$REPO_NAME-rules" --capabilities CAPABILITY_NAMED_IAM
+
+artifacts:
+  files:
+    - '**/*'
+type: zip

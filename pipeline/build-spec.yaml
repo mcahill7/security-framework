@@ -1,0 +1,15 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      ruby: 2.6
+    commands:
+      - gem install cfn-nag
+  build:
+    commands:
+      - cfn_nag_scan --input-path config_rules.yaml
+
+artifacts:
+  files:
+    - '**/*'
+type: zip
