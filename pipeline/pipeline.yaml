@@ -9,7 +9,7 @@ Parameters:
     Default: mcahill7
   BranchName:
     Type: String
-    Default: v1
+    Default: master
   GitHubToken:
     Type: String
   BuildAgentImage:
