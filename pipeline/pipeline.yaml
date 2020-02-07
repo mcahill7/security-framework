@@ -309,6 +309,9 @@ Resources:
                   - s3:PutBucketAcl
                   - s3:GetEncryptionConfiguration
                   - s3:PutEncryptionConfiguration
+                  - s3:PutObject
+                  - s3:GetObject
+                  - lambda:*
                 Resource:
                   - '*'
   ActionBuild:
