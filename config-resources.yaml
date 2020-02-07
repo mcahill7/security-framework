@@ -36,23 +36,19 @@ Resources:
       S3BucketName: !Ref ConfigStore
     DependsOn: 'ConfigStore'
 
-
-  ConfigRuleForVolumeTags:
-    Type: AWS::Config::ConfigRule
-    Properties:
-      InputParameters:
-        tag1Key: CostCenter
-      Scope:
-        ComplianceResourceTypes:
-          - AWS::EC2::Volume
-      Source:
-        Owner: AWS
-        SourceIdentifier: REQUIRED_TAGS
-    DependsOn: 'ConfigurationRecorder'
-
   ConfigStore:
     Type: AWS::S3::Bucket
     Properties:
+      AccessControl: BucketOwnerFullControl
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  LambdaStore:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: security-framework-lambdastore
       AccessControl: BucketOwnerFullControl
       BucketEncryption:
         ServerSideEncryptionConfiguration:
@@ -102,3 +98,10 @@ Resources:
             Condition:
               Bool:
                 'aws:SecureTransport': false
+
+Outputs:
+  LambdaStore:
+    Description: LambdaStore
+    Value: !Ref LambdaStore
+    Export:
+      Name: !Sub '${AWS::StackName}-LambdaStore'

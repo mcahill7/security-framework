@@ -1,16 +1,35 @@
 version: 0.2
+
+env:
+  variables:
+    CFN_TEMPLATES_MANAGED: |
+      config-rule-instance-type
+      config-rule-s3-public-read
+
+    CFN_TEMPLATES_CUSTOM: |
+      efs-encrypted-check
+
 phases:
   install:
     runtime-versions:
       ruby: 2.6
+      python: 3.7
 
   build:
     commands:
-      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file config_resources.yaml --stack-name "$REPO_NAME-resources" --capabilities CAPABILITY_NAMED_IAM
-
-  post_build:
-    commands:
-      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file config_rules.yaml --stack-name "$REPO_NAME-rules" --capabilities CAPABILITY_NAMED_IAM
+      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file config-resources.yaml --stack-name "$REPO_NAME-resources" --capabilities CAPABILITY_NAMED_IAM
+      - echo Build started on `date`
+      - |
+        for cfn_template in $CFN_TEMPLATES_MANAGED; do
+          echo "Deploying CloudFormation template $cfn_template"
+          aws cloudformation deploy --no-fail-on-empty-changeset --template-file rules/$cfn_template.yaml --stack-name $cfn_template --capabilities CAPABILITY_NAMED_IAM
+        done
+      - |
+        for cfn_template in $CFN_TEMPLATES_CUSTOM; do
+          echo "Deploying CloudFormation template $cfn_template"
+          aws cloudformation package --template-file rules/$cfn_template.yaml --s3-bucket security-framework-lambdastore --output-template-file $cfn_template_packaged.yaml
+          aws cloudformation deploy --no-fail-on-empty-changeset --template-file $cfn_template_packaged.yaml --stack-name $cfn_template --capabilities CAPABILITY_NAMED_IAM
+        done
 
 artifacts:
   files:

@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Custom Config Rule to check whether EFS Filesystem is configured to encrypt
+Parameters:
+  Ec2VolumeTagKey:
+    Type: String
+    Default: CostCenter
+
+Resources:
+
+  EfsEncryptedCheckLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt EfsEncryptedCheckLamdaRole.Arn
+      CodeUri: efs-encrypted-check/
+      Handler: efs-encrypted-check.lambda_handler
+      Runtime: python3.7
+      Policies:
+      - AWSLambdaExecute
+      - Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+            - elasticfilesystem:DescribeFileSystems
+            - elasticfilesystem:DescribeMountTargets
+            - kms:DescribeKey
+            - kms:GetKeyPolicy
+            - kms:GetKeyRotationStatus
+            - kms:GetPublicKey
+            - kms:ListKeys
+            - kms:ListAliases
+            - kms:ListKeyPolicies
+            - kms:TagResource
+            - config:*
+            - iam:*
+            - lambda:*
+            Resource: '*'
+
+  EfsEncryptedCheckLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt EfsEncryptedCheckLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: config.amazonaws.com
+
+  EfsEncryptedCheckRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: efs_encrypted_check
+      Description: Check whether EFS Filesystem is configured to encrypt
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::EFS::FileSystem
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+          - EventSource: aws.config
+            MessageType: OversizedConfigurationItemChangeNotification
+        SourceIdentifier: !GetAtt EfsEncryptedCheckLambda.Arn
+
+
+#  EfsEncryptedCheckLambda:
+#    Type: AWS::Lambda::Function
+#    Properties:
+#      Description: Check whether EFS Filesystem is configured to encrypt
+#      Handler: efs_encrypted_check/efs_encrypted_check.handler
+#      Runtime: python3.6
+#      Role: !Ref EfsEncryptedCheckLamdaRole
+#      Code:
+#        S3Bucket: !ImportValue security-framework-resources-LambdaStore
+#        S3Key: efs-encrypted-check.zip
+
+  EfsEncryptedCheckLamdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: rules-example-policy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - elasticfilesystem:DescribeFileSystems
+            - elasticfilesystem:DescribeMountTargets
+            - kms:DescribeKey
+            - kms:GetKeyPolicy
+            - kms:GetKeyRotationStatus
+            - kms:GetPublicKey
+            - kms:ListKeys
+            - kms:ListAliases
+            - kms:ListKeyPolicies
+            Effect: Allow
+            Resource: '*'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess
+      - arn:aws:iam::aws:policy/service-role/AWSConfigRulesExecutionRole
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole

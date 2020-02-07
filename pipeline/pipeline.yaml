@@ -9,10 +9,9 @@ Parameters:
     Default: mcahill7
   BranchName:
     Type: String
-    Default: master
+    Default: v1
   GitHubToken:
     Type: String
-    Default: 8599fe83571d03ac02da6fe09b80605468934b36
   BuildAgentImage:
     Type: String
     Default: aws/codebuild/standard:2.0
