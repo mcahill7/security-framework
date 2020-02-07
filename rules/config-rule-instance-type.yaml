@@ -10,6 +10,7 @@ Resources:
   ConfigRuleForVolumeTags:
     Type: AWS::Config::ConfigRule
     Properties:
+      ConfigRuleName: EC2_VOLUME_REQUIRED_TAGS
       InputParameters:
         tag1Key: CostCenter
       Scope:

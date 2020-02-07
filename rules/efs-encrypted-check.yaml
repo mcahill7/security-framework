@@ -46,7 +46,7 @@ Resources:
   EfsEncryptedCheckRule:
     Type: AWS::Config::ConfigRule
     Properties:
-      ConfigRuleName: efs_encrypted_check
+      ConfigRuleName: EFS_ENCRYPTED_CHECK
       Description: Check whether EFS Filesystem is configured to encrypt
       Scope:
         ComplianceResourceTypes:
