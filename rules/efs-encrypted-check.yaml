@@ -60,18 +60,6 @@ Resources:
             MessageType: OversizedConfigurationItemChangeNotification
         SourceIdentifier: !GetAtt EfsEncryptedCheckLambda.Arn
 
-
-#  EfsEncryptedCheckLambda:
-#    Type: AWS::Lambda::Function
-#    Properties:
-#      Description: Check whether EFS Filesystem is configured to encrypt
-#      Handler: efs_encrypted_check/efs_encrypted_check.handler
-#      Runtime: python3.6
-#      Role: !Ref EfsEncryptedCheckLamdaRole
-#      Code:
-#        S3Bucket: !ImportValue security-framework-resources-LambdaStore
-#        S3Key: efs-encrypted-check.zip
-
   EfsEncryptedCheckLamdaRole:
     Type: AWS::IAM::Role
     Properties:

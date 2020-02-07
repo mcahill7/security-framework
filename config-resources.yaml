@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Codified Config Rules
+Description: Resources required for config rules
 Parameters:
   Ec2VolumeTagKey:
     Type: String

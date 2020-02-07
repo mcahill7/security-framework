@@ -62,7 +62,7 @@ Resources:
                   - codebuild:StartBuild
                   - codebuild:BatchGetBuilds
                 Resource:
-                  - !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${RepositoryName}*'
+                  - !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/*'
         - PolicyName: s3-policy
           PolicyDocument:
             Version: 2012-10-17
@@ -181,28 +181,6 @@ Resources:
                   - codepipeline:StartPipelineExecution
                 Resource:
                   - !Sub 'arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${Pipeline}'
-  PipelinTriggerRule:
-    Type: AWS::Events::Rule
-    Properties:
-      EventPattern:
-        source:
-          - aws.codecommit
-        detail-type:
-          - 'CodeCommit Repository State Change'
-        resources:
-          - !Sub 'arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${RepositoryName}'
-        detail:
-          event:
-            - referenceCreated
-            - referenceUpdated
-          referenceType:
-            - branch
-          referenceName:
-            - !Ref BranchName
-      Targets:
-        - Arn: !Sub 'arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${Pipeline}'
-          RoleArn: !GetAtt PipelineTriggerRole.Arn
-          Id: !Sub 'codepipeline-${Pipeline}'
   # Action-related resources
   ActionServiceRole:
     Type: AWS::IAM::Role
@@ -230,7 +208,7 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                 Resource:
-                  - !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${RepositoryName}*'
+                  - !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/*'
         - PolicyName: artifact-policy
           PolicyDocument:
             Version: '2012-10-17'
@@ -257,8 +235,8 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${RepositoryName}-*'
-                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${RepositoryName}-*:log-stream:*'
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*'
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*'
         - PolicyName: deployment-policy
           PolicyDocument:
             Version: '2012-10-17'
@@ -276,7 +254,7 @@ Resources:
                   - iam:PutRolePolicy
                   - iam:GetRolePolicy
                 Resource:
-                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/${RepositoryName}*'
+                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/*'
               - Sid: awscloudformation
                 Effect: Allow
                 Action:
@@ -290,7 +268,7 @@ Resources:
                   - cloudformation:ListChangeSets
                   - cloudformation:DescribeChangeSet
                 Resource:
-                  - !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${RepositoryName}*/*'
+                  - !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*'
                   - !Sub 'arn:aws:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31'
               - Sid: awscloudwatch
                 Effect: Allow
@@ -298,7 +276,7 @@ Resources:
                   - cloudwatch:PutMetricAlarm
                   - cloudwatch:DeleteAlarms
                 Resource:
-                  - !Sub 'arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${RepositoryName}*'
+                  - !Sub 'arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*'
               - Sid: globalresources
                 Effect: Allow
                 Action:
